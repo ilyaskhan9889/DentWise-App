@@ -1,11 +1,12 @@
-import React from 'react'
+import Navbar from "@/components/Navbar";
+import React from "react";
 
 function DashboardPage() {
   return (
     <div>
-      vsdugfdilf
+      <Navbar />
     </div>
-  )
+  );
 }
 
-export default DashboardPage
+export default DashboardPage;
