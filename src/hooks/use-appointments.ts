@@ -3,7 +3,8 @@ import {
   getAppointments,
   getBookedTimeSlots,
   bookAppointment,
-  getUserAppointments
+  updateAppointmentStatus,
+  getUserAppointments,
 } from "@/lib/actions/appointments";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 export function useGetAppointments() {
@@ -44,4 +45,18 @@ export function useUserAppointments() {
   });
 
   return result;
+}
+export function useUpdateAppointmentStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateAppointmentStatus,
+    onSuccess: () => {
+      // Invalidate and refetch user appointments after updating status
+      queryClient.invalidateQueries({ queryKey: ["getAppointments"] });
+    },
+    onError: (error) => {
+      console.error("Error updating appointment status:", error);
+    },
+  });
 }

@@ -7,7 +7,7 @@ import { useUser } from "@clerk/nextjs";
 import { useGetDoctors } from "@/hooks/use-doctors";
 import { useGetAppointments } from "@/hooks/use-appointments";
 import DoctorsManagement from "@/components/admin/DoctorsManagement";
-
+import RecentAppointments from "@/components/admin/RecentAppointments";
 function AdminDashboardClient() {
   const { user } = useUser();
   const { data: doctor = [], isLoading: doctorsLoading } = useGetDoctors();
@@ -62,6 +62,7 @@ function AdminDashboardClient() {
           completedAppointments={stats.completedAppointments}
         />
         <DoctorsManagement />
+        <RecentAppointments />
       </div>
     </div>
   );

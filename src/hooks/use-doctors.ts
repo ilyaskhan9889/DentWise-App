@@ -39,6 +39,7 @@ export function useUpdateDoctor() {
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["getDoctors"] });
+      queryClient.invalidateQueries({ queryKey: ["getAvailableDoctors"] });
       console.log("Doctor updated successfully");
     },
     onError: (error: any) => {
