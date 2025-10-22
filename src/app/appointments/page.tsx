@@ -1,10 +1,13 @@
 "use client";
-import { useState } from "react";
+import { use, useState } from "react";
 import Navbar from "@/components/Navbar";
 import ProgressSteps from "@/components/appointments/ProgressSteps";
 import DoctorSelectionStep from "@/components/appointments/DoctorSelectionStep";
 import TimeSelectionStep from "@/components/appointments/TimeSelectionStep";
-import { useBookAppointment, useUserAppointments } from "@/hooks/use-appointments";
+import {
+  useBookAppointment,
+  useUserAppointments,
+} from "@/hooks/use-appointments";
 import BookingConfirmationStep from "@/components/appointments/BookingConfirmationStep";
 import { APPOINTMENT_TYPES } from "@/lib/utils";
 import { format } from "date-fns";
@@ -22,13 +25,14 @@ function AppointmentsPage() {
   const [bookedAppointment, setBookedAppointment] = useState<any>(null);
   const bookAppointmentsMutation = useBookAppointment();
 
-  const {data:userAppointments = []} = useUserAppointments();
+  const { data: userAppointments = [] } = useUserAppointments();
   const handleSelectDentist = (dentistId: string) => {
     setSelectedDentistId(dentistId);
     setSelectedDate("");
     setSelectedTime("");
     setSelectedType("");
   };
+
   const hanldeBookAppointment = async () => {
     if (!selectedDentistId || !selectedDate || !selectedTime) {
       toast.error("Please complete all appointment details.");
@@ -45,9 +49,36 @@ function AppointmentsPage() {
         reason: appointmentType?.name,
       },
       {
-        onSuccess:  async (appointment) => {
+        onSuccess: async (appointment) => {
           // set the booked appointment details to show in confirmation modal
           setBookedAppointment(appointment);
+          try {
+            // send confirmation email
+            const emailResponse = await fetch("/api/send-confirmation-email", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userEmail: appointment.patientEmail,
+                doctorName: appointment.doctorName,
+                appointmentDate: format(
+                  new Date(appointment.date),
+                  "MMMM dd, yyyy"
+                ),
+                appointmentTime: appointment.time,
+                appointmentType: appointmentType?.name,
+                duration: appointmentType?.duration, 
+                price: appointmentType?.price, 
+              }),
+
+            });
+            if (!emailResponse.ok) {
+              throw new Error("Failed to send confirmation email");
+            }
+          } catch (error) {
+            console.error("Error sending confirmation email:", error);
+          }
           // show the confirmation modal
           setShowConfirmationModal(true);
           // reset the booking process
@@ -57,6 +88,7 @@ function AppointmentsPage() {
           setSelectedTime("");
           setSelectedType("");
         },
+
         onError: (error: any) => {
           toast.error(
             error?.message || "There was an error booking your appointment."
